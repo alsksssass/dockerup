@@ -1,0 +1,14 @@
+FROM alpine:3.19
+
+ENV ADMINER_URL="https://github.com/vrana/adminer/releases/download/v4.8.1/adminer-4.8.1.php"
+
+RUN apk update && apk add wget && apk add php && apk add php-session && apk add php-mbstring && \
+	apk add php-mysqli && apk add php-pdo_mysql && apk add dumb-init
+
+RUN mkdir -p /var/lib/adminer && wget -qO /var/lib/adminer/index.php ${ADMINER_URL}
+
+COPY ./tools ./tools
+
+EXPOSE 8080
+
+ENTRYPOINT ["./tools/adminer.sh"]

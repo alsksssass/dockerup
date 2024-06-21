@@ -1,0 +1,10 @@
+FROM alpine:3.19
+
+RUN apk update && apk add samba
+
+COPY ./tools ./tools
+COPY ./conf/smb.conf /etc/samba/smb.conf
+
+EXPOSE 445
+
+ENTRYPOINT ["./tools/samba.sh"]

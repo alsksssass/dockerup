@@ -1,0 +1,12 @@
+FROM alpine:3.18.5
+
+RUN apk update && apk add lighttpd
+
+COPY ./conf/lighttpd.conf /etc/lighttpd/lighttpd.conf
+COPY ./tools ./tools
+
+RUN mv ./tools/index.html /var/www/localhost/htdocs/index.html && mv ./tools/images /var/www/localhost/htdocs/images
+
+EXPOSE 8000
+
+ENTRYPOINT ["./tools/lighttpd.sh"]
