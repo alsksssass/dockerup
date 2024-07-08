@@ -1,6 +1,6 @@
 FROM alpine:3.19
 
-RUN apk update && apk add nginx && apk add openssl
+RUN apk update && apk add nginx && apk add openssl apache2-utils
 
 COPY ./conf/nginx.conf /etc/nginx/nginx.conf
 
@@ -10,8 +10,12 @@ COPY ./tools /etc/nginx/tools
 
 RUN chmod +rwx /etc/nginx/tools/nginx.sh
 
+RUN echo "dlf1dltka" | htpasswd -c -i /etc/nginx/.htpasswd sabyun
+
+
 RUN mkdir /etc/nginx/ssl
 
 EXPOSE 443
+EXPOSE 9999
 
 ENTRYPOINT ["/etc/nginx/tools/nginx.sh"]

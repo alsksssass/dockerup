@@ -1,120 +1,48 @@
-version: "3"
-
 services:
   nginx:
+    init: true
     container_name: nginx
     build:
       context: ./requirements/nginx/
       dockerfile: Dockerfile
     networks:
-      - inception
+      - code_net
     ports:
       - 443:443
+      - 9999:9999
+    depends_on:
+      - code
     volumes:
-      - wp-wordpress:/var/lib/nginx/wordpress
+      - code_data:/var/lib/nginx/code_data
     restart: on-failure
-  wordpress:
-    container_name: wordpress
+  code:
+    init: true
+    container_name: code_server
     build:
-      context: ./requirements/wordpress/
+      context: ./requirements/code_server/
       dockerfile: Dockerfile
-    networks:
-      - inception
     volumes:
-      - wp-wordpress:/var/lib/nginx/wordpress
+      - ${HOME}/.local:/home/coder/.local
+      - ${HOME}/.config:/home/coder/.config
+      - ${HOME}:/home/coder/project
     environment:
-      WORDPRESS_URL: ${WORDPRESS_URL}
-      WORDPRESS_DB_NAME: ${WORDPRESS_DB_NAME}
-      WORDPRESS_DB_USER: ${WORDPRESS_DB_USER}
-      WORDPRESS_DB_PASSWORD: ${WORDPRESS_DB_PASSWORD}
-      WORDPRESS_DB_HOST: ${WORDPRESS_DB_HOST}
-      WORDPRESS_ADMIN_NAME: ${WORDPRESS_ADMIN_NAME}
-      WORDPRESS_ADMIN_PWD: ${WORDPRESS_ADMIN_PWD}
-      WORDPRESS_ADMIN_EMAIL: ${WORDPRESS_ADMIN_EMAIL}
-      WORDPRESS_USER_NAME: ${WORDPRESS_USER_NAME}
-      WORDPRESS_USER_PWD: ${WORDPRESS_USER_PWD}
-      WORDPRESS_USER_EMAIL: ${WORDPRESS_USER_EMAIL}
-    restart: on-failure
-  mariadb:
-    container_name: mariadb
-    build:
-      context: ./requirements/mariadb/
-      dockerfile: Dockerfile
+      - DOCKER_USER=${USER}
     networks:
-      - inception
-    volumes:
-      - wp-database:/var/lib/mysql
-    environment:
-      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
-      MYSQL_USER: ${MYSQL_USER}
-      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
-      MYSQL_DATABASE: ${MYSQL_DATABASE}
-    restart: on-failure
-  adminer:
-    container_name: adminer
-    build:
-      context: ./requirements/bonus/adminer/
-      dockerfile: Dockerfile
-    networks:
-     - inception
+      - code_net
     ports:
-     - 8080:8080
+      - 10000:8080
     restart: on-failure
-  redis:
-    container_name: redis
-    build:
-      context: ./requirements/bonus/redis/
-      dockerfile: Dockerfile
-    networks:
-     - inception
-    restart: on-failure
-  ftp:
-    container_name: ftp
-    build:
-      context: ./requirements/bonus/ftp/
-      dockerfile: Dockerfile
-    networks:
-     - inception
-    ports:
-     - 2121:2121
-     - 50001-50005:50001-50005
-    restart: on-failure
-    volumes:
-      - wp-wordpress:/var/lib/nginx/wordpress
-    environment:
-      FTP_PASSWORD: ${FTP_PASSWORD}
-  samba:
-    container_name: samba
-    build:
-      context: ./requirements/bonus/samba/
-      dockerfile: Dockerfile
-    networks:
-     - inception
-    ports:
-     - 445:445
-    restart: on-failure
-    volumes:
-     - wp-wordpress:/var/lib/nginx/wordpress
-    environment:
-      SAMBA_PASSWORD: ${SAMBA_PASSWORD}
 
 networks:
-  inception:
-    name: inception
+  code_net:
+    name: code_net
     driver: bridge
 
 volumes:
-  wp-database:
-    name: wp-database
+  code_data:
+    name: code_data
     driver: local
     driver_opts:
       type: none
       o: bind
-      device: /home/sabyun/data/mariadb
-  wp-wordpress:
-    name : wp-wordpress
-    driver: local
-    driver_opts:
-      type: none
-      o: bind
-      device: /home/sabyun/data/wordpress
+      device: /home/sabyun/code_data

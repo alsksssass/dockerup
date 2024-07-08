@@ -1,6 +1,5 @@
 all :
-	mkdir -p /home/sabyun/data/wordpress
-	mkdir -p /home/sabyun/data/mariadb
+	mkdir -p /home/sabyun/code_data
 	docker compose -f srcs/docker-compose.yml up -d
 
 clean :
@@ -8,4 +7,4 @@ clean :
 
 fclean :
 	docker compose -f srcs/docker-compose.yml down --volumes --rmi all
-	rm -rf /home/sabyun/data
+	rm -rf /home/sabyun/code_data
